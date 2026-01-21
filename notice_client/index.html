@@ -259,7 +259,9 @@
             React.useEffect(()=>{
                 fetch("http://localhost:9999/api/notices", {method:"GET"})
                 .then(res=>res.json())//첫번째 then() 서버에서 응답이 왔을때 수행됨 (단 이 응답이 성공인지 실패인지는 모름)
-                           //만일 성공했다면, 서버로 부터 전달된 데이터는 아직 json문자열 형태가 아니므로, json문자열로 변경해보자    
+                                // 만일 성공했다면, 서버로 부터 전달된 데이터는 아직 json문자열 형태이므로, javascript 형식 데이터로 변환하자
+                                // (response.json() json으로 읽어서 변환하자)
+                                // JSON.parse()는 동기 방식이라 불가능
                 .then(data =>{ //여기서의 data는 첫번째 then에서 반환된 Promise가 resolve하면서 넘겨준 값
                     console.log("서버로 부터 받은 데이터는 ", data);
                     setNoticeList(data);

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+     <style>
+        body{
+            margin: 0px;
+        }
+        #wrapper{
+            width:100%;
+            height:800px;
+            background-color: antiquewhite;
+        }
+        .aside{
+            width: 20%;
+            height: 100%;
+            background-color: aqua;
+            float:left;
+        }
+        .aside *{
+            width: 90%;
+            margin:5px;
+        }
+        textarea{
+            height:150px;
+        }
+        .content{
+            width: 60%;
+            height:100%;
+            float: left;
+        }
+        .detail{
+            width: 20%;
+            height: 100%;
+            background-color: beige;
+            float: left;
+        }
+        .detail *{
+            width: 90%;
+            margin:5px;            
+        }
+        table{
+            border-collapse: collapse;
+            width:100%;
+        }
+        table, th, td{
+            border:1px solid #ccc;
+        }
+        th, td{
+            padding:8px;
+        }
+     </style>
+     <script>
+        /*
+        React 의 2가지 개발 방식 
+        1) Vite 프로젝트 개발방식 :  실제 Production 모드, 규모가 클 경우
+
+        2) CDN 링크 방식 : 학습, 연구 , 테스트 목적, 규모가 작을 경우 
+        */
+     </script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+    <!-- 게시판 애플리케이션이 표현될 영역 -->
+    <div id="app"></div>
+
+    <script type="text/babel">
+
+        // 좌측의 글등록 디자인을 컴포넌트화 시켜놓은 RegistForm
+        // 개발자가 컴포넌트 안에  매개변수로 전달할 수 잇는 데이터를 가리켜 props 라 부른다
+
+        // 구조: [현재값, 바꿀수있는함수] = useState(초기값)
+        // 원리: 리액트에서 일반 변수는 값이 변해도 화면이 다시 그려지지 않습니다.
+        // 하지만 상태(State)가 변하면 리액트는 화면을 자동으로 다시 그려줍니다. 이것을 '렌더링'이라고 합니다.
+        function RegistForm(props){
+            const [title, setTitle] = React.useState("");
+            const [writer, setWriter] = React.useState("");
+            const [content, setContent] = React.useState("");
+            
+            //아래의 메서드에서 서버에 요청 로직을 작성할 수도 있지만, 우리는 SPA(Single Page Application=새로고침없는 사이트)
+            //예정이므로, 게시물 등록에서 끝나는 것이 아니라, 목록, 상세, 수정, 삭제 요청을 하려면 변수 또는 메서드가 서로 공유되어야 
+            //개발이 편하다. 따라서 변수, 메서드를 자식 컴포넌트에 로직을 두지 않고, 부모 컴포넌트에 둬야 개발이 용이함..
+            function handleClick(){
+
+                //글등록 요청시 넘게될 notice 생성 
+                const notice={
+                    title:title,
+                    writer:writer,
+                    content:content
+                }    
+
+                //자식 컴포넌트는 부모의 메서드를 직접 접근할 수 없다...
+                //해결책은? 자식 컴포넌트에 props로 부모의 메서드명을 전달해주면 된다..즉 props를 이용한 정보 전달 방법을 사용 
+                props.onRegist(notice);//부모 컴포넌트 메서드 호출 가능?//regist(notice)
+            }   
+
+            return (
+                <div className="aside">
+                    <form>                        
+                        <input type="text" placeholder="제목 입력" onChange={ e=> setTitle(e.target.value) }/>
+                        <input type="text" placeholder="작성자 입력" onChange={ e=> setWriter(e.target.value) }/>        
+                        <textarea onChange={ e=> setContent(e.target.value) }></textarea>
+                        <button type="button" onClick={handleClick}>{props.bt}</button>
+                    </form>    
+                </div>
+            );
+        }
+
+        //가운데 게시물 목록이 나올 영역을 컴포넌트로 정의 
+        function NoticeList(props){//자식 컴포넌트가 부모 컴포넌트의 변수, 메서드를 직접 접근할 수 없으므로, 주로 props를 이용하여
+            //전달 받자..여기서는 noticeList를 전달받을 예정임..
+            return (
+                <div className="content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>제목</th>
+                                <th>작성자</th>
+                                <th>등록일</th>
+                                <th>조회수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {/* map()은 어디서 온건가? js의 배열 메서드 중 하나.. 선언적 프로그래밍 중 함수형 프로그래밍의 원칙 적용 
+                                눈에 보이지 않지만, 반복문을 스스로 수행함 , 개발자는 몇번째 반복인지 중간에 개입불가..개발자는 그냥 
+                                어떤 업무를 원하는지 선언만 하는 프로그래밍 방식..
+                            */}
+                            { props.noticeList.map( notice => (
+                                <tr key={notice.noticeId} onClick={ ()=> props.onSelectOne(notice) } style={{cursor:"pointer"}}>
+                                    <td>sdf</td>                                    
+                                    <td>{notice.title}</td>
+                                    <td>{notice.writer}</td>
+                                    <td>{notice.regdate}</td>
+                                    <td>{notice.hit}</td>
+                                </tr>
+                                 ))
+                            }    
+                        </tbody>        
+                    </table>                            
+                </div>
+            );
+        }
+
+        //우측 게시물 내용이 나올 영역을 컴포넌트로 정의 
+        //자식 컴포넌트가 부모의 변수나 메서드를 접근하려면 props를 이용할 수 있다..
+        //현재 우리의 경우, 게시물 한건을 표현한  notice를 이 컴포넌트가 바인딩되어 바라보게 되면, 개발자가 notice정보를 변경만 해도
+        //자동으로 UI에 영향을 미친다...(리엑트, Vue를 사용하는 이유이다..즉 개발자가 데이터에만 집중하면 되고, UI를 수정하는데 
+        //노력을 쏟지말라 !!!)
+        function DetailForm(props){
+            // 이렇게 선언하면 title은 일반변수가 아닌 바인딩 변수가 되기 때문에, 이 변수를 바라보는 UI는 자동으로 값이 변경됨
+            const [title, setTitle] = React.useState("");
+            const [writer, setWriter] = React.useState("");
+            const [content, setContent] = React.useState("");
+
+            // !! 불리언 타입으로 강제 변환만 수행
+            const selectedId = !! props.notice.noticeId;    // noticeId에 값이 없을 경우엔 false로 처리
+
+            /*------------------------------------------------------------
+            아래의 부수 효과를 일으키는 메서드인 useEffect()가 실행되는 시점
+            1) 컴포넌트가 최초로 렌더링 되는 시점
+            2) 의존성 배열 값이 변경될 때
+            --------------------------------------------------------------*/
+            React.useEffect(()=>{
+                setTitle(props.notice.title);
+                setWriter(props.notice.writer);
+                setContent(props.notice.content);
+            }, [props.notice]); // 두 번째 매개변수인 배열을 가리켜 의존성 배열이라 하고, 이 배열 안에는 개발자가 감시하고 싶은 데이터를 넣으면 됨
+            // DetailForm 컴포넌트는 최초 렌더링될 때 useEffect()를 호출하게 되어 있고, 두 번째 매개변수인 의존성 배열에 부모 컴포넌트의
+            // notice를 감시 대상으로 놓으면, 부모의 notice 값이 변경될 때마다 useEffect가 호출되어 진다.
+
+            
+            function handleEdit(){
+                // 유효성 체크 후 수정 요청
+
+                // 자바스크립트의 불리언 강제 변환 문법
+                /*
+                    !0      -   true
+                    !1      -   false
+                    !""     -   true
+                    !"zino" -   false
+                    !null   -   true
+
+                    !!의 의미 - 불리언 타입으로 강제 변환만 수행
+
+                    !!0         false
+                    !!1         true
+                    !!undefined false
+                    !!{}        true    비어 있기는 하지만, 객체는 존재함 그래서 논리값으로 변환했을 경우 true
+                */
+
+
+
+                if(selectedId == false){
+                    alert("수정하고 싶은 게시물을 먼저 선택하세요");
+                }
+
+
+                const payload={
+                    title: title,
+                    writer: writer,
+                    content: content    
+                }
+
+                props.onUpdate(props.notice.noticeId, payload); //props로 전달된  onUpdate 변수명이  update함수를 참조하므로...      
+            }
+            
+            function handleDelete(){
+                if(!selectedId){
+                    alert("먼저 삭제하실 글을 선택하세요");
+                    return;
+                }
+
+                // 부모인 App의 삭제 메서드 호출
+                props.onDeleteOne(props.notice.noticeId);
+            }
+
+            // virtual DOM read-only 
+            return (
+                <div className="detail">
+                    <form>                        
+                        <input type="text" value={title} onChange={e => setTitle(e.target.value)}/>
+                        <input type="text" value={writer} onChange={e => setWriter(e.target.value)}/>        
+                        <textarea value={content} onChange={e => setContent(e.target.value)}></textarea>
+                        <button type="button" style={{width:"45%"}} onClick={handleEdit}>수정</button>
+                        <button type="button" style={{width:"45%"}} onClick={handleDelete}>삭제</button>
+                    </form>    
+                </div>
+            );            
+        }            
+
+        //자식 컴포넌트들을 조합하기 위한 부모 컴포넌트 정의 
+        //추후 개발시 공통의 메서드나 컴포넌트가 변수의 공유등에 아주 필수적임
+        function App(){
+            //서버로부터 가져온 목록데이터를 화면에 표시할 UI와 엮게될 바인딩 변수 선언 
+            const [noticeList, setNoticeList]=React.useState([]);
+            
+            //구조 분해 할당 
+            const [notice, setNotice] = React.useState({
+                 noticeId :"",
+                 title:"",
+                 writer:"",
+                 content:"",
+                 regdate:"",
+                 hit:0
+            });
+            function edit(){
+                
+            }                
+            /*---------------------------------------------
+            목록 가져오기 
+            컴포넌트가 렌더링(화면에 등장) 된 직후에  실행해야 할 업무를 부수효과(side effect)를 다룰때 자주 사용되는 메서드 
+            예) 렌더링 직후 서버 호출, DOM 접근 등.. 화면에 렌더링 직후 1회만 실행
+            ---------------------------------------------*/
+            React.useEffect(()=>{
+                fetch("http://localhost:9999/api/notices", {method:"GET"})
+                .then(res=>res.json())//첫번째 then() 서버에서 응답이 왔을때 수행됨 (단 이 응답이 성공인지 실패인지는 모름)
+                           //만일 성공했다면, 서버로 부터 전달된 데이터는 아직 json문자열 형태가 아니므로, json문자열로 변경해보자    
+                .then(data =>{ //여기서의 data는 첫번째 then에서 반환된 Promise가 resolve하면서 넘겨준 값
+                    console.log("서버로 부터 받은 데이터는 ", data);
+                    setNoticeList(data);
+                })
+                .catch(err => console.log(err));
+            }, []);
+
+
+            /*---------------------------------------------
+            서버에 비동기로 글 등록 요청             
+            ---------------------------------------------*/
+            function regist(notice){
+
+                //JQuery Ajax에 의존하지 않고, 브라우저 자체적으로 비동기 통신을 지원하는 기능이 fetch()
+                //alert("나는 부모 컴포넌트인 App의 regist() 메서드 이다.");
+                fetch("http://localhost:9999/api/notices", {
+                    method:"POST", 
+                    headers:{
+                        "Content-Type" : "application/json"
+                    },
+                    body:JSON.stringify(notice) //마치 백엔드 스프링서버의 jackson과 비슷..
+                })
+                .then(res => res.json())
+                .then(savedNotice => {
+                    console.log("savedNotice is {}", savedNotice);
+                    
+                    setNoticeList(prev => [savedNotice, ...prev]);
+                })
+                .catch(err => console.log(err)); 
+
+            }
+
+            /*---------------------------------------------
+            상세보기
+            ---------------------------------------------*/
+            function selectOne(notice){
+                //alert("부모인 App의 메서드 호출 성공'");
+                //1) db에서 다시 불러오기 
+
+                //2) 리스트 컴포넌트인 자식이, 현재 선택한 게시물 정보를 이쪽으로 넘김 
+                console.log("자식 컴포넌트로부터 전달된 notice is ", notice);
+                setNotice(notice);
+            }
+
+            /*---------------------------------------------
+            수정하기
+            ---------------------------------------------*/
+            function update(noticeId, payload){
+                //alert("부모컴포넌트인 App의 update() 호출");
+                console.log("수정할 내용은 ", payload, " noticeId=", noticeId);
+                
+                //웹브라우저에서 지원하는 비동기 통신 함수, 장점? 외부 라이브러리인 JQuery에 의존하지 않음 
+
+                fetch(`http://localhost:9999/api/notices/${noticeId}`, {
+                    method:"PUT",
+                    headers:{"Content-Type":"application/json"},
+                    body:JSON.stringify(payload)  //객체는 그 자체를 네트워크로 전송할 수 없다. 반드시 문자열로 변경되어야 가능하다..
+                })
+                // 서버로부터 응답이 오면, 아래의 then()이 수행, 하지만 수정 요청 자체가 성공 or 실패인지는 then() 안에서 판단해야 함
+                .then(res => {
+                    // JS도 throw가 있다.
+                    if(!res.ok) throw new Error("수정실패");
+                    return res.json();  // 서버가 json 문자열을 전송했다는 전제로 이 메서드 호출
+                })
+                .then(updated => {
+                    console.log("수정 결과로 응답받은 데이터 ", updated);
+                    // 기존의 App가 현재 보유중인 바인드 변수인 noticeList를 새롭게 재배치하지 말고, 수정된 한 건만 배열에 변화를 주면
+                    // 리액트의 UI가 이 부분을 인식하여, 렌더링도 해당 부분만 수정하게 만들자..
+                    // 배열에 들어있는 객체들을 모두 지우고, 새롭게 메모리에 올리지 말고, 변경된 배열에 요소만 교체하자
+                    // 이 작업을 위해서는 java언어에서는 컬렉션 프레임웍 기술로 접근하면 되지만, js에서는 배열 메서드로 처리
+                    // js의 배열메서드는 선언적 프로그래밍 방법 중 함수형 프로그래밍 방법이 반영되어 있음)
+
+                    // 아래의 화살표 함수의 prev 매개변수에는 기존 noticeList가 자동으로 리액트에 의해 전달된다
+                    // 이유? 우리가 정의한 함수가 아니라 noticeList에 대한 setter이기 때문에... 가능한 일..
+                    // map() 기존 배열 요소를 접근하여, 새로운 배열을 반홤함. 이 때 새로운 배열에 어떤 값을 넣을 지는 
+                    // 개발자가 결정지을 수 있다. 즉, 반복문에 일일이 관여할 수는 없고, 어떤 요소를 채울지만 관여...
+                    setNoticeList(prev => prev.map(n => (n.noticeId === updated.noticeId ? updated : n)));
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+            }
+
+            /*---------------------------------------------
+            한 건 삭제
+            ---------------------------------------------*/
+            function deleteOne(noticeId){
+                //alert("부모의 삭제 메서드 호출");
+
+                fetch(`http://localhost:9999/api/notices/${noticeId}`, {method:"DELETE"})
+                .then(res => {
+                    if(!res.ok) throw new Error("삭제실패");
+                    // 삭제 성공 시 서버에서는 대부분 204 상태코드인(No Content)를 보낸 경우가 흔하므로, res.json()은 수행하지 않는다.
+                })
+                .then(() => {
+                    // 서버로부터 응답데이터가 없으므로, 그냥 목록 갱신만 처리하자
+                    // filter() 메서드는 배열을 순회하면서 콜백이 true한 요소만 새로운 배열에 포함시킨다.
+                    // 즉, 삭제가 되지 않은 요소만 골라서 새로운 배열에 넣어줌
+                    setNoticeList(prev => prev.filter(n => n.noticeId !== noticeId));
+
+                    // DetailForm이 현재 useEffect()로 부모의 notice를 감시하고 있으므로, DetailForm에 들어있는 input 박스들을
+                    // 직접 지우려고 하지 말고, 개발자는 바인딩 데이터를 제어하면 부수적으로 UI의 변경은 따라 옴...
+                    setNotice({
+                        noticeId :"",
+                        title:"",
+                        writer:"",
+                        content:"",
+                        regdate:"",
+                        hit:0
+                    })
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+            }
+
+            // 여기서 notice가 위에 props.notice가 된다.
+            // 리액트가 뒤에서 이런 객체를 만들어 자식에게 던져줍니다.
+            // {
+            //   notice: { noticeId: "...", title: "...", ... },
+            //   onUpdate: function update(payload) { ... }
+            // }
+            return (
+                <div id="wrapper">
+                    <RegistForm bt="공지등록" onRegist={regist} />
+                    <NoticeList noticeList={noticeList} onSelectOne={selectOne}/>
+                    <DetailForm notice={notice} onUpdate={update} onDeleteOne={deleteOne}/>
+                </div>
+            )                
+        }
+        const root=ReactDOM.createRoot(document.getElementById("app"));        
+        root.render( <App />);
+    </script>        
+</body>
+</html>
+
+

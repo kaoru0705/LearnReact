@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+</head>
+<body>
+    <!--Vue, React 등의 자바스크립트 프레임웍에서는 애플리케이션의 대상이 되는 컨테이너가 존재해야 함-->
+    <div id="app"></div>    
+
+    <script type="text/babel">
+
+        //컴포넌트 정의하기, 컴포넌트 함수 안에는 반드시 화면에 사용될 값이 return되어야 함 
+        //또한 태그가 여러줄인 경우 반드시 소괄호로 감싸야 함 
+        function MyCar(){
+            return (
+                <div>
+                    <h1>나는 트럭이다</h1>
+                    <Body />
+                    <Wheel />
+                </div>
+            );            
+        }    
+
+        function Body(){
+            return <div>난 몸체</div>;  
+        }
+
+        function Wheel(){
+            return <div>난 바퀴</div>
+        }
+
+        //React객체 생성  createRoot()함수 안에는 어디를 대상으로 그려질지(rendering)를 결정해야 한다
+        const root=ReactDOM.createRoot(document.getElementById("app"));
+
+        // render() 메서드 안에는 , 개발자가 재사용 가능성을 위해 정의한 컴포넌트가 온다.
+        //컴포넌트란? Vue, React, Angular.js 등의 프레임웍에서는 개발자가 반복되거나 자주 사용되는 태그집합을
+        //컴포넌트란 단위로 정의해놓을 수 있으며, 이 컴포넌트를 사용할때는 마치 태그처럼 사용해야 한다..
+        //컴포넌트를 정의한다는 것은 개발자 정의 태그를 만드는 것과 유사함 
+        root.render( <MyCar />);
+
+    </script>
+</body>
+</html>

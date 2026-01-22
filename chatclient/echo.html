@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+    
+    <!-- 리액트 프로그램이 렌더링 될 영역 -->
+    <div id="app"></div>
+
+
+
+
+    <!-- text/babel을 명시해야 함수 안 태그에 대해 당황하지 않는다. -->
+    <script type="text/babel">
+
+        // 부모인 루트 컴포넌트 정의
+        function App(){
+            const [status, setStatus] = React.useState("DISCONNECTED");
+            const [user, setUser] = React.useState("");     
+            const [input, setInput] = React.useState("");   // 입력 테스트박스에 들어갈 바인드 변수
+            const [icon, setIcon] = React.useState("");
+            const [msgList, setMsgList] = React.useState([]);     // 바인딩 변수로 선언한 이유, UI에 반영되어야 하므로
+
+
+
+            // 컴포넌트 내에서 바인딩 목적이 아닌, 즉 렌더링과 무관하지만 컴포넌트의 생명주기 동안 유지되어야 하는
+            // 값은(저장공간) useRef를 이용한다. 전역변수처럼 ws를 사용하지 마라.
+            const wsRef = React.useRef(null);     //wsRef는 이 시점부터 ref 객체가 되며, 실제 데이터는 ref 안에 current Property에 담아야 한다.
+
+            function connect(){
+                // 현재 state가 존재하면 readyState는 자동으로 OPEN이 들어가 있다.
+                if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){   // 이미 접속이 되어 있다면, 더 이상 코드 진행을 아래로 내려가지 못하게 방어
+                    return;
+                }
+
+                // 2011년도에 표준화되었기 때문에 표준을 준수하는 모든 브라우저는 웹소켓을 보유하고 있다
+                //new WebSocket("ws://스프링서버주소");
+                const ws = new WebSocket("ws://localhost:9991/ws/echo");
+                wsRef.current = ws;
+
+                setStatus("CONNECTING");
+                
+                // WebSocket은 통신에 필요한 이벤트 핸들러를 지원
+                ws.onopen = () => {
+
+                    // 이 라인을 만난다는 것은 에러 없이 접속에 성공했다는 것이므로, 바인딩 변수인 status 값을 접속 상태로 전환
+                    // 접속이 성공되었을 때 감지하는 이벤트 핸들러를 이용한 접속 성공 처리
+                    setStatus("CONNECTED");
+                }
+                ws.onclose = () => {
+                    // 접속이 해제되었을 때를 감지하는 이벤트 핸들러...
+                    setStatus("DISCONNECTED");
+                }
+                ws.onerror = () => {
+                    setStatus("ERROR");
+                }
+
+                ws.onmessage = (event) => {
+                    console.log("서버로부터 메시지 도착 ", event.data);
+                    setMsgList(prev => [...prev, event.data]);
+                }
+
+            }
+
+            // function disconnect처럼 적어도 되지만 이렇게도 가능
+            const sendMessage = () => {
+                // 접속이 계속 유지되어 있다면, 그때만 메시지를 전송하자
+                if(!wsRef.current && wsRef.current.readyState !== WebSocket.OPEN){
+                    return;
+
+                }
+                
+                // 메시지 보낼 예정
+                // 보낸사람, 보낼메시지, 이모티콘
+                /*
+                    {
+                        "id": "zino",
+                        "msg": "배고파",
+                        "icon": "smile"
+                    }
+                */
+
+                let payload = {
+                    id : user,
+                    message : input,
+                    icon : icon
+                }
+
+                let data = JSON.stringify(payload);
+                wsRef.current.send(data);
+
+                setInput("");
+            }
+
+            function disconnect(){
+                wsRef.current.close();  // 접속 끊기
+            }
+
+            return (
+                <div id="wrapper">
+                    <h2>WebSocket Echo Client</h2>
+
+                    <div>
+                        <b>Status: {status}</b>
+                    </div>
+
+                    <div>
+                        <button onClick={connect}>Connect</button>
+                        <button onClick={disconnect}>Disconnect</button>
+                    </div>
+
+                    <div>
+                        <div>
+                            <input type="text" value={user} placeholder="사용자명 입력" onChange={e => setUser(e.target.value)}/>
+                        </div>
+
+                        <div>
+                            <input type="text" value={input} placeholder="message input" onChange={e => setInput(e.target.value)}/>
+                        </div>
+
+                        <div>
+                            <select value={icon} onChange={e => setIcon(e.target.value)}>
+                                <option value="smile">😊</option>
+                                <option value="cry">😢</option>
+                                <option value="jump">🤣</option>
+                                <option value="angry">😡</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <button onClick={sendMessage}>Send</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4>Received Message</h4>
+                        <ul>
+                            {msgList.map((msg, idx) => (<li key={idx}>{msg}</li>))}
+                        </ul>
+                    </div>
+                </div>
+            )
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById("app"));
+        root.render(<App />);
+    </script>
+
+</body>
+</html>

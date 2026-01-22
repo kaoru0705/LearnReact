@@ -22,8 +22,11 @@
         // 부모인 루트 컴포넌트 정의
         function App(){
             const [status, setStatus] = React.useState("DISCONNECTED");
+            const [user, setUser] = React.useState("");     
             const [input, setInput] = React.useState("");   // 입력 테스트박스에 들어갈 바인드 변수
+            const [icon, setIcon] = React.useState("");
             const [msgList, setMsgList] = React.useState([]);     // 바인딩 변수로 선언한 이유, UI에 반영되어야 하므로
+
 
 
             // 컴포넌트 내에서 바인딩 목적이 아닌, 즉 렌더링과 무관하지만 컴포넌트의 생명주기 동안 유지되어야 하는
@@ -74,7 +77,23 @@
                 }
                 
                 // 메시지 보낼 예정
-                wsRef.current.send(input);
+                // 보낸사람, 보낼메시지, 이모티콘
+                /*
+                    {
+                        "id": "zino",
+                        "msg": "배고파",
+                        "icon": "smile"
+                    }
+                */
+
+                let payload = {
+                    id : user,
+                    message : input,
+                    icon : icon
+                }
+
+                let data = JSON.stringify(payload);
+                wsRef.current.send(data);
 
                 setInput("");
             }
@@ -97,8 +116,26 @@
                     </div>
 
                     <div>
-                        <input type="text" value={input} placeholder="message input" onChange={e => setInput(e.target.value)}/>
-                        <button onClick={sendMessage}>Send</button>
+                        <div>
+                            <input type="text" value={user} placeholder="사용자명 입력" onChange={e => setUser(e.target.value)}/>
+                        </div>
+
+                        <div>
+                            <input type="text" value={input} placeholder="message input" onChange={e => setInput(e.target.value)}/>
+                        </div>
+
+                        <div>
+                            <select value={icon} onChange={e => setIcon(e.target.value)}>
+                                <option value="smile">smile</option>
+                                <option value="cry">cry</option>
+                                <option value="jump">jump</option>
+                                <option value="angry">angry</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <button onClick={sendMessage}>Send</button>
+                        </div>
                     </div>
 
                     <div>

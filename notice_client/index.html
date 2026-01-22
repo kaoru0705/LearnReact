@@ -169,6 +169,7 @@
                 setTitle(props.notice.title);
                 setWriter(props.notice.writer);
                 setContent(props.notice.content);
+                console.log("notice 변경");
             }, [props.notice]); // 두 번째 매개변수인 배열을 가리켜 의존성 배열이라 하고, 이 배열 안에는 개발자가 감시하고 싶은 데이터를 넣으면 됨
             // DetailForm 컴포넌트는 최초 렌더링될 때 useEffect()를 호출하게 되어 있고, 두 번째 매개변수인 의존성 배열에 부모 컴포넌트의
             // notice를 감시 대상으로 놓으면, 부모의 notice 값이 변경될 때마다 useEffect가 호출되어 진다.

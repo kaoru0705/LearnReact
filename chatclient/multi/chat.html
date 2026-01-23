@@ -40,7 +40,16 @@
 
 
 function App() {
+    /*-----------------------------
+    바인드 변수(컴포넌트와 함께 살아가면서, 특히 UI와 후킹되어 있는 상태 변수)
+    ------------------------------*/
     const [name, setName] = React.useState("");
+    const [roomId, setRoomId] = React.useState("");
+
+    /*-----------------------------
+    Ref 변수(컴포넌트와 함께 살아가면서, 특히 UI 상관없는 변수)
+    ------------------------------*/
+    const stompRef = React.useRef(null);
 
     /*-----------------------------
     컴포넌트 렌더링 직후에 사용자 정보 가져오기
@@ -71,15 +80,67 @@ function App() {
         const sock = new SockJS("http://localhost:9992/ws/stomp");
 
         const stomp = Stomp.over(sock);   // Stomp는 멀티 캐스팅 채팅을 구독 개념으로 단순화 시켜서, 보다 쉽게 메시지 통신을 구현할 수 있음
-                            // Stomp는 WebSocket, Sock.js 기반 위에서 실행됨
+                                        // Stomp는 WebSocket, Sock.js 기반 위에서 실행됨
 
         stomp.connect({}, () => {
             console.log("접속 성공");
+            stompRef.current = stomp;   // Ref 객체에 무언가 담을 때는 객체 자체에 담는 게 아니라, Ref가 가진 current property에 담아야 함
         }, (err) => {
             console.log("Stomp connect error", err);
         });
+    }
+
+    /*-----------------------------
+    방에 입장
+    ------------------------------*/
+    const joinRoom = () => {
+        // 접속도 하지 않으면서 방 들어가기를 먼저 누른 경우 욕하자!
+        if(!stompRef.current || !stompRef.current.connected){
+            alert("먼저 접속을 해주세요");
+            return;
+        }
+
+        const rid = roomId.trim();  // 혹시라도 모를, 공백문자 제거 예) "5공백" --> "5"
+        if(!rid){
+            alert("룸 번호를 입력하세요");
+            return;
+        }
+
+        // 이전에 구독해놓은 게 있다면 구독 해제...
+        
+        // 채팅 메시지 초기화
+
+        // 룸 참여의 의미는 Stomp Chatting server에게 이 방을 구독하겠다는 의미
+        stompRef.subscribe(`/topic/room/${rid}`, (frame) => {
+            // 데이터 전송을 위해 JSON 문자열로 변환
+            const body = JSON.parse(frame.body);
+
+        })
 
     }
+
+    const send = () => {
+
+        stompRef.current.send("/app/room/" + roomId + "/send", {}, "aaaaaa");    // 스프링 컨트롤러에서 요청을 받기 때문에 uri 생성
+    }
+
+
+    /*-----------------------------
+    채팅 서버 접속 해제
+    ------------------------------*/
+
+    const disconnect = () => {
+        // 접속해제를 하게 되면 구독 취소...
+
+        // 존재할 때만 해제
+        if(stompRef.current) {
+            stompRef.current.disconnect(() => {
+    
+            });
+            stompRef.current = null;    // 해제 후 변수값 다시 초기화
+        }
+    }
+
 
     return (
     <div className="wrap">
@@ -101,8 +162,8 @@ function App() {
         <hr style={{ border: 0, borderTop: "1px solid #eee", margin: "14px 0" }} />
 
         <div className="row">
-            <input placeholder="roomId (예: 1,2,study)" />
-            <button className="primary">Join Room</button>
+            <input value={roomId} placeholder="roomId (예: 1,2,study)" onChange={e => setRoomId(e.target.value)} />
+            <button className="primary" onClick={joinRoom}>Join Room</button>
 
             <div style={{ flex: 1 }} />
 
@@ -138,7 +199,8 @@ function App() {
             <input
             style={{ flex: 1, minWidth: 260 }}
             placeholder="메시지 입력"/>
-            <button className="primary" >Send</button>
+
+            <button className="primary" onClick={send}>Send</button>
         </div>
 
         <div style={{ marginTop: 10, fontSize: 12, color: "#666" }}>

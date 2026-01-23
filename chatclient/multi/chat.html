@@ -111,7 +111,7 @@ function App() {
         // 채팅 메시지 초기화
 
         // 룸 참여의 의미는 Stomp Chatting server에게 이 방을 구독하겠다는 의미
-        stompRef.subscribe(`/topic/room/${rid}`, (frame) => {
+        stompRef.current.subscribe(`/topic/room/${rid}`, (frame) => {
             // 데이터 전송을 위해 JSON 문자열로 변환
             const body = JSON.parse(frame.body);
 

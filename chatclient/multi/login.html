@@ -44,21 +44,34 @@
     <script type="text/babel">
         // React가 되면서 input을 /로 닫아주고 class -> className이 된다.
         function App(){
+            const [homepageId, setHomepageId] = React.useState("");
+            const [password, setPassword] = React.useState("");
 
-            const payload={
-
-            }
             
             function login(){
+
+                let payload={
+                    homepageId: homepageId,
+                    password: password
+                };
+
                 fetch("http://localhost:9992/api/auth/login", {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify(payload)
                 })
-                .then(res => 
-                    console.log(res)
-                )
-                .then()
+                .then(res => {
+                    if(!res.ok) throw Error("로그인 실패");
+                    return res.json();  // 서버에서 전송되어온 json 문자열을 대상으로 객체 리터럴로 변환하면서, 동시에 Promise 생성 및
+                    // 그 Promise의 resolve(res.json())
+                })
+                .then(data => {
+                    console.log("서버의 응답", data);
+                    if(data.ok){
+                        alert("로그인 성공");
+                        location.href="chat.html";
+                    }
+                })
                 .catch(err => console.log(err));
 
             }
@@ -67,8 +80,8 @@
                 <div className="wrapper">
                     <div className="card">
                         <h2>로그인</h2>
-                        <input type="text" placeholder="아이디"/>
-                        <input type="text" placeholder="비밀번호"/>
+                        <input type="text" placeholder="아이디" value={homepageId} onChange={e => setHomepageId(e.target.value)}/>
+                        <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)}/>
                         <button onClick={login}>로그인</button>
 
                         <div>로그인 실패</div>

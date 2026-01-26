@@ -145,7 +145,7 @@
             }
 
 
-            // 추후 다른 메서드 등에서 ㅜ독 객체를 접근하게 하기 위해 subscribeRef로 담아 둠
+            // 추후 다른 메서드 등에서 구독 객체를 접근하게 하기 위해 subscribeRef로 담아 둠
             subscribeRef.current = stompRef.current.subscribe(`/topic/room/${rid}`, (frame) => {
                 // 서버에서 전송된 메시지가 frame으로 들어옴
                 //console.log("frame is ", frame);
@@ -282,7 +282,7 @@
                         <option value="❤️">❤️</option>
                     </select>
                     </div>
-                    {/* ref={}*/}
+                    {/* ref={} 이 DOM 요소가 실제로 만들어지면 그 DOM 객체를 chatBoxRef.current에 넣어줘 */}
                     <div style={{ marginTop: "14px" }} className="chatBox" id="chat-box" ref={chatBoxRef}>
                         {
                             messages.length === 0 ?

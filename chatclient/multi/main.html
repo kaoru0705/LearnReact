@@ -117,7 +117,7 @@
         [ subscribe() 메서드 ]
         인수 1 - 구독 주소 예) /topic/room/room번호
                 참고 1) 구독 주소를 destination이라 함
-                참고 2) 구독 신청 시 구독 주소만 전송되는 게 아니라, 구독 구분 id도 함께 전송됨 ex) sub-0 
+                참고 2) 구독 신청 시 구독 주소만 전송되는 게 아니라, 구독 구분 id도 함께 전송됨 ex) sub-0  accessor.getSubscriptionId(); in StompEventListener
 
         인수 2 - 구독 요청 시 사용되는 값이 아니라, 구독 신청 후 서버에서 전송된 메시지를 처리할 콜백함수
                 따라서, 같은 방에 있는 사용자들의 메시지를 수시로 받는 함수...
@@ -126,7 +126,7 @@
         const joinRoom = () => {
 
             // 접속하지 않고 구독(방에 참여)을 시도할 경우
-            if(stompRef.current || !stompRef.current.connected) {
+            if(!stompRef.current || !stompRef.current.connected) {
                 alert("먼저 접속 후 룸을 등록하세요");
                 return;
             }
@@ -136,6 +136,12 @@
             if(!rid) {
                 alert("roomID를 입력하세요");
                 return;
+            }
+
+            // 이미 구독된 정보가 있다면, 중복될 경우 꼬일 수 있으므로 구독 등록 전 이전 등록을 해제
+            if(subscribeRef.current) {
+                subscribeRef.current.unsubscribe();
+                subscribeRef.current = null;
             }
 
 
@@ -201,7 +207,7 @@
 
             try {
                 // 기존의 구독 신청이 있다면, 구독 해제
-                // topic/room/4 sub-01 sub-01 sub-01 sub-01
+                // 안 그러면 topic/room/4 sub-01 sub-01 sub-01 sub-01
                 if(subscribeRef.current && stompRef.current) {
                     subscribeRef.current.unsubscribe();
                     subscribeRef.current = null;

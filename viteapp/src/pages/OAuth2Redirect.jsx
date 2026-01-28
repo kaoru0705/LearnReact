@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function OAuth2Redirect() {
+    const [member, setMember] = useState(null);
 
     /*
         1) 컴포넌트가 렌더링 될 때
@@ -18,6 +19,7 @@ export default function OAuth2Redirect() {
         })
         .then(data => {
             console.log("서버에서 가져온 사용자 정보는 ", data);
+            setMember(data);
         })
         .catch(err => console.log(err));
     }, []);
@@ -27,14 +29,17 @@ export default function OAuth2Redirect() {
             <h2 style={{marginTop:0}}>OAuth2 로그인 처리 결과</h2>
 
             <div></div>
-
+            
+            {/* member가 참일 경우 출력(rendering 시점이 너무 빠르다. member에 값이 들어가기 전에 렌더링됨) */}
+            {member &&
             <div style={{display:"flex", gap:16, alignItems:"center"}}>
                 <div>
-                    <div>회원명</div>
-                    <div>이메일</div>
-                    <div>프로바이더명</div>
+                    <div>{member.name}</div>
+                    <div>{member.email}</div>
+                    <div>{member.provider}</div>
                 </div>
             </div>
+            }
 
         </div>
     );

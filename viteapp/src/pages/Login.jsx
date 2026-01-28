@@ -18,6 +18,16 @@ export default function Login(){
         loginRequest(payload);
     }
 
+    // google, naver, kakao 처럼 제공하는 자 provider
+    const loginSns = (provider) => {
+        // 스프링부트가 내장한, 구글의 로그인 요청 주소
+        // http://172.30.1.40:9993/oauth2/authorization/google
+
+        location.href = `http://localhost:9993/oauth2/authorization/${provider}`;
+
+    }
+    // onClick={loginSns("Google")}     이건 호출이다.
+    // onClick={()=>loginSns("Google")} 
     return (
         <div style={{maxWidth:420, margin:"0 auto"}}>
             <div>
@@ -26,6 +36,10 @@ export default function Login(){
                     <input type="text" placeholder="아이디 입력" className={uiStyles.inputStyle} ref={homepageIdRef}/>
                     <input type="password" placeholder="비밀번호 입력" className={uiStyles.inputStyle} ref={passwordRef}/>
                     <button type="button" onClick={login} className={uiStyles.primaryBtn}>로그인</button>
+
+                    <button type="button" onClick={() => loginSns("google")} className={uiStyles.snsBtn}>Google</button>
+                    <button type="button" onClick={() => loginSns("naver")} className={uiStyles.snsBtn}>Naver</button>
+                    <button type="button" onClick={() => loginSns("kakao")} className={uiStyles.snsBtn}>Kakao</button>
                 </form>
 
             </div>

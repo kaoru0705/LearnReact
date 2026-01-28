@@ -16,3 +16,11 @@
     cursor :pointer;
     font-weight:700;
 }
+
+.snsBtn{
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    cursor: pointer;
+}

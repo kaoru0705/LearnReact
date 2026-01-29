@@ -1,0 +1,9 @@
+### 회원가입
+POST http://localhost:9994/api/auth
+Content-Type: application/json
+
+{
+    "homepageId" : "dong",
+    "password" : "1234",
+    "name" : "동훈"
+}

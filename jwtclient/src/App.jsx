@@ -21,20 +21,20 @@ function App() {
       password : password
     };
 
-    const params = new URLSearchParams();
-    params.append("homepageId", homepageId);
-    params.append("password", password);
+    // const params = new URLSearchParams();
+    // params.append("homepageId", homepageId);
+    // params.append("password", password);
 
-    fetch("http://localhost:9994/api/auth/login", {
-      method: "POST",
-      headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      body: params
-    })
     // fetch("http://localhost:9994/api/auth/login", {
     //   method: "POST",
-    //   headers: {"Content-Type": "application/json"},
-    //   body: JSON.stringify(payload)
+    //   headers: {"Content-Type": "application/x-www-form-urlencoded"},
+    //   body: params
     // })
+    fetch("http://localhost:9994/api/auth/login", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload)
+    })
     .then(res => {
       if(!res.ok) throw new Error("에러");
       return res.json();
